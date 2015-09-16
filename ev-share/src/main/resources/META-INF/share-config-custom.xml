@@ -1,0 +1,20 @@
+<alfresco-config>
+	<config evaluator="string-compare" condition="DocLibActions">
+		<actions>
+			<!--  <action id="document-call-ws" type="javascript" label="actions.document.call-ws">
+	            <param name="function">onCallWebScript</param>
+	         </action> -->
+			<action id="document-call-ws" type="pagelink" label="actions.document.call-ws">
+			   <param name="page">hdp/ws/list-auditdata?nodeRef={node.nodeRef}</param>
+			</action>
+         </actions>
+         <actionGroups>
+         	<actionGroup id="document-browse">
+            	<action index="600" id="document-call-ws" />
+            </actionGroup>
+            <actionGroup id="document-details">
+            	<action index="600" id="document-call-ws" />
+            </actionGroup>
+         </actionGroups>
+	</config>
+</alfresco-config>

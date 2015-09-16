@@ -1,0 +1,5 @@
+<webscript>
+   <shortname>EV Audit</shortname>
+   <description>EV Audit panel</description>
+   <url>/eisenvault/components/document-details/evaudit</url>
+</webscript>

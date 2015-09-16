@@ -1,7 +1,7 @@
 <extension>
   <modules>
     <module>
-      <id>Example Aikau Widgets</id>
+      <id>EisenVault Aikau Widgets</id>
       <version>1.0</version>
       <auto-deploy>true</auto-deploy>
       <configurations>
@@ -9,7 +9,7 @@
           <web-framework>
             <dojo-pages>
               <packages>
-                <package name="example" location="js/example"/>
+                <package name="eisenvault"   location="js/eisenvault"/>
               </packages>
             </dojo-pages>
           </web-framework>
