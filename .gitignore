@@ -1,0 +1,9 @@
+bin
+build
+.classpath
+.project
+.settings
+ev-aikau-auditreport/ev-repo/alf_data_dev
+ev-aikau-auditreport/ev-share/alf_data_dev
+ev-aikau-auditreport/ev-repo/target
+ev-aikau-auditreport/ev-share/target
