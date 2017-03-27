@@ -15,5 +15,17 @@
 		<property name="namespaceService">
 			<ref bean="NamespaceService" />
 		</property>
+		<property name="permissionHelper">
+			<ref bean="permissionHelper" />
+		</property>	
+	</bean>
+	<bean id="webscript.com.eisenvault.haspermissions.get" class="com.eisenvault.webscript.HasPermissions"
+		parent="webscript">
+		<property name="permissionHelper">
+			<ref bean="permissionHelper" />
+		</property>	
+		<property name="repository">
+			<ref bean="repositoryHelper" />
+		</property>	
 	</bean>
 </beans>

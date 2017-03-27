@@ -31,6 +31,9 @@ import org.springframework.extensions.webscripts.Cache;
 import org.springframework.extensions.webscripts.DeclarativeWebScript;
 import org.springframework.extensions.webscripts.Status;
 import org.springframework.extensions.webscripts.WebScriptRequest;
+import org.springframework.http.HttpStatus;
+
+import com.eisenvault.utils.PermissionHelper;
 
 public class NodeAuditTrailWebScript extends DeclarativeWebScript {
 	private static Log logger = LogFactory.getLog(NodeAuditTrailWebScript.class);
@@ -38,7 +41,12 @@ public class NodeAuditTrailWebScript extends DeclarativeWebScript {
 	private AuditService auditService;
 	private Repository repository;
 	private NamespaceService namespaceService;
-	
+	private PermissionHelper permissionHelper;
+
+	public void setPermissionHelper(PermissionHelper permissionHelper) {
+		this.permissionHelper = permissionHelper;
+	}
+
 	public void setNodeService(NodeService nodeService) {
 		this.nodeService = nodeService;
 	}
@@ -58,18 +66,26 @@ public class NodeAuditTrailWebScript extends DeclarativeWebScript {
 	@Override
 	protected Map<String, Object> executeImpl(WebScriptRequest req, Status status, Cache cache) {
 		Map<String, Object> model = new HashMap<String, Object>();
-		
+
 		try{
+
 			String nodeRefString = req.getParameter("nodeRef");
-			if(StringUtils.isBlank(nodeRefString))
+			if(StringUtils.isBlank(nodeRefString)) {
 				throw new Exception("'nodeRef' missing while processing request...");
-			
+			}
+
 			nodeRefString = nodeRefString.replace(":/", "");
 			NodeRef nodeRef = repository.findNodeRef("node", nodeRefString.split("/"));
-			
+
+			if (!permissionHelper.checkPermissions(nodeRef)) {
+				model.put("data", new ArrayList<>());
+				status.setCode(HttpStatus.FORBIDDEN.value());
+				return model;
+			}
+
 			List<TemplateAuditInfo> auditTrailList = getAuditTrail(nodeRef);
 			List<Map<String,Object>> auditList = new ArrayList<Map<String,Object>>(auditTrailList.size());
-			
+
 			for(TemplateAuditInfo auditInfo : auditTrailList){
 				if(logger.isDebugEnabled()){
 					logger.debug(auditInfo.toString());
@@ -92,22 +108,22 @@ public class NodeAuditTrailWebScript extends DeclarativeWebScript {
 						}catch(TypeConversionException e){
 							valueStrings.put(key, value.toString());
 						}
- 					}
+					}
 					auditInfoMap.put("auditValues",valueStrings);
 				}
-				
+
 				auditList.add(auditInfoMap);
 			}
 			Map<QName, Serializable> props = nodeService.getProperties(nodeRef);
 			String fileName = (String) props.get(ContentModel.PROP_NAME);
-			
+
 			model.put("data", auditList);
 			model.put("nodeRef", nodeRef.getId());
 			model.put("fileName",fileName);
 			model.put("count", auditList.size());
 			model.put("returnStatus", Boolean.TRUE);
 			model.put("statusMessage", "Successfully retrieved audit trail for nodeRef["+nodeRef.getId()+"]");
-			
+
 		}catch(Exception e){
 			logger.warn(e.getMessage());
 			model.put("returnStatus", Boolean.FALSE);
@@ -115,111 +131,117 @@ public class NodeAuditTrailWebScript extends DeclarativeWebScript {
 		}
 		return model;
 	}
-	
+
 	private List<TemplateAuditInfo> getAuditTrail(NodeRef nodeRef) {
 		final List<TemplateAuditInfo> result = new ArrayList<TemplateAuditInfo>();
-		
+
 		final AuditQueryCallback callback = new AuditQueryCallback() {
-			
+
+			@Override
 			public boolean valuesRequired() {
 				return true;
 			}
-			
+
+			@Override
 			public boolean handleAuditEntryError(Long entryId, String errorMsg, Throwable error) {
 				throw new AlfrescoRuntimeException("Failed to retrieve audit data.", error);
 			}
-			
+
+			@Override
 			public boolean handleAuditEntry(Long entryId, String applicationName, String userName, long time, Map<String, Serializable> values) {
 				TemplateAuditInfo auditInfo = new TemplateAuditInfo(applicationName, userName, time, values);
 				result.add(auditInfo);
 				return true;
 			}
 		};
-		
-		// resolve the path of the node 
-        final String nodePath = ISO9075.decode(nodeService.getPath(nodeRef).toPrefixString(namespaceService));
-        
-        AuthenticationUtil.runAs(new RunAsWork<Object>() {
+
+		// resolve the path of the node
+		final String nodePath = ISO9075.decode(nodeService.getPath(nodeRef).toPrefixString(namespaceService));
+
+		AuthenticationUtil.runAs(new RunAsWork<Object>() {
+			@Override
 			public Object doWork() throws Exception {
 				String applicationName = "alfresco-access";
 				AuditQueryParameters pathParams = new AuditQueryParameters();
 				pathParams.setApplicationName(applicationName);
 				pathParams.addSearchKey("/alfresco-access/transaction/path", nodePath);
 				auditService.auditQuery(callback, pathParams, -1);
-				
+
 				AuditQueryParameters copyFromPathParams = new AuditQueryParameters();
 				copyFromPathParams.setApplicationName(applicationName);
 				copyFromPathParams.addSearchKey("/alfresco-access/transaction/copy/from/path", nodePath);
 				auditService.auditQuery(callback, copyFromPathParams, -1);
-				
+
 				AuditQueryParameters moveFromPathParams = new AuditQueryParameters();
-                moveFromPathParams.setApplicationName(applicationName);
-                moveFromPathParams.addSearchKey("/alfresco-access/transaction/move/from/path", nodePath);
-                auditService.auditQuery(callback, moveFromPathParams, -1);
-                
+				moveFromPathParams.setApplicationName(applicationName);
+				moveFromPathParams.addSearchKey("/alfresco-access/transaction/move/from/path", nodePath);
+				auditService.auditQuery(callback, moveFromPathParams, -1);
+
 				return null;
 			}
 		}, AuthenticationUtil.getAdminUserName());
-		
-        // sort audit entries by time of generation
-        Collections.sort(result, new Comparator<TemplateAuditInfo>()
-        {
-            public int compare(TemplateAuditInfo o1, TemplateAuditInfo o2)
-            {
-                return o1.getDate().compareTo(o2.getDate());
-            }
-        });
+
+		// sort audit entries by time of generation
+		Collections.sort(result, new Comparator<TemplateAuditInfo>()
+		{
+			@Override
+			public int compare(TemplateAuditInfo o1, TemplateAuditInfo o2)
+			{
+				return o1.getDate().compareTo(o2.getDate());
+			}
+		});
 		return result;
 	}
 
 	public class TemplateAuditInfo
 	{
 		private String applicationName;
-        private String userName;
-        private long time;
-        private Map<String, Serializable> values;
-        
-        public TemplateAuditInfo(String applicationName, String userName, long time, Map<String, Serializable> values)
-        {
-            this.applicationName = applicationName;
-            this.userName = userName;
-            this.time = time;
-            this.values = values;
-        }
-        
-        public String getAuditApplication()
-        {
-            return this.applicationName;
-        }
+		private String userName;
+		private long time;
+		private Map<String, Serializable> values;
 
-        public String getUserIdentifier()
-        {
-            return this.userName;
-        }
+		public TemplateAuditInfo(String applicationName, String userName, long time, Map<String, Serializable> values)
+		{
+			this.applicationName = applicationName;
+			this.userName = userName;
+			this.time = time;
+			this.values = values;
+		}
 
-        public Date getDate()
-        {
-            return new Date(time);
-        }
+		public String getAuditApplication()
+		{
+			return this.applicationName;
+		}
 
-        public String getAuditMethod()
-        {
-        	if(this.values.get("/alfresco-access/transaction/action").equals("updateNodeProperties")){
-        		return "UPDATE NODE PROPERTIES";
-        	}else if(this.values.get("/alfresco-access/transaction/action").equals("readContent")){
-        		return "READ CONTENT";
-        	}
-        	else
-        		return this.values.get("/alfresco-access/transaction/action").toString();
-        }
-        
-        public Map<String, Serializable> getValues()
-        {
-            return this.values;
-        }
-        
-        public String toString(){
-        	return "TemplateAuditInfo [applicationName=" + applicationName + ",userName= " + userName + ",time= " + time + ",values= "+ values +"]";
-        }
+		public String getUserIdentifier()
+		{
+			return this.userName;
+		}
+
+		public Date getDate()
+		{
+			return new Date(time);
+		}
+
+		public String getAuditMethod()
+		{
+			if(this.values.get("/alfresco-access/transaction/action").equals("updateNodeProperties")){
+				return "UPDATE NODE PROPERTIES";
+			}else if(this.values.get("/alfresco-access/transaction/action").equals("readContent")){
+				return "READ CONTENT";
+			} else {
+				return this.values.get("/alfresco-access/transaction/action").toString();
+			}
+		}
+
+		public Map<String, Serializable> getValues()
+		{
+			return this.values;
+		}
+
+		@Override
+		public String toString(){
+			return "TemplateAuditInfo [applicationName=" + applicationName + ",userName= " + userName + ",time= " + time + ",values= "+ values +"]";
+		}
 	}
 }
