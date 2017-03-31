@@ -12,6 +12,19 @@ This addon uses the default **alfresco-access** audit application. Make sure tha
   audit.alfresco-access.sub-actions.enabled=true
   ```
 
+The following configuration shows the default permission configuration.
+  ```
+  #Is a comma-separated list of groups that may use the audit report. 
+  #The 'ALL' setting allows all users to use it. The opposite is an empty setting  
+  auditreport.allowedGroups=ALFRESCO_ADMINISTRATORS
+  
+  #The user needs to write permissions for the document
+  auditreport.writePermission=true
+  
+  #Is a comma-separated list of site groups that may use the audit report. 
+  auditreport.allowedSiteGroup=SiteManager
+  ```  
+
 A custom Document Library Action and link on Document Details page are provided for viewing the audit report for a document.
 
 ![document library action](https://cloud.githubusercontent.com/assets/3936714/9900992/2e42caa8-5c97-11e5-9f7b-b3210bd2cbe8.png)
