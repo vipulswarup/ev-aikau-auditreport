@@ -4,7 +4,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.eisenvault</groupId>
     <artifactId>ev-share</artifactId>
-    <version>1.0.0</version>
+    <version>1.0.1</version>
     <name>ev-share AMP project</name>
     <packaging>amp</packaging>
     <description>Manages the lifecycle of the ev-share AMP (Alfresco Module Package)</description>
@@ -12,7 +12,7 @@
     <parent>
         <groupId>com.eisenvault</groupId>
         <artifactId>ev-aikau-auditreport</artifactId>
-        <version>1.0.0</version>
+        <version>1.0.1</version>
     </parent>
 
     <!-- 
