@@ -110,6 +110,9 @@ public class PermissionHelper {
 		if (CollectionUtils.isEmpty(this.allowedSiteGroup)) {
 			return false;
 		}
+		if (this.allowedSiteGroup.contains("ALL")) {
+			return true;
+		}
 		final String username = AuthenticationUtil.getFullyAuthenticatedUser();
 		try {
 			AuthenticationUtil.runAs(new RunAsWork<Void>() {
