@@ -55,7 +55,8 @@ if (json.status == 200 && jsonResult.result === "true")
 								       hide: false,
 								       _currentNode: jsonNode.item,
 								       currentPath: jsonNode.item.location.path,
-								       lastBreadcrumbPublishTopic : "ALF_NAVIGATE_TO_PAGE"
+								       lastBreadcrumbPublishTopic : "ALF_NAVIGATE_TO_PAGE",
+								       additionalCssClasses: "breadcrumb-readonly"
 								    }
 								 },
 								 {
@@ -94,7 +95,7 @@ if (json.status == 200 && jsonResult.result === "true")
 			                                                    	   align:"left",
 			                                                    	   config:{
 			                                                    		   style:{
-			                                                    			   
+			                                                    			   marginRight: "5px"
 			                                                    		   },
 			                                                    		   label:"Audit Trail for: "
 			                                                    	   }
@@ -117,7 +118,10 @@ if (json.status == 200 && jsonResult.result === "true")
 					                                                   name: "alfresco/renderers/Version",
 					                                                   align: "left",
 					                                                   config: {
-					                                                      currentItem: jsonNode.item
+					                                                      currentItem: jsonNode.item,
+					                                                      style:{
+			                                                    			   marginLeft: "5px"
+			                                                    		   },
 					                                                   }
 					                                                }
 					                                             ]
@@ -129,28 +133,6 @@ if (json.status == 200 && jsonResult.result === "true")
 					                                              widgets: [
 					                                                 {
 					                                                    name: "alfresco/renderers/Date",
-					                                                    align: "left",
-					                                                    config: {
-					                                                       currentItem: jsonNode.item
-					                                                    }
-					                                                 },
-					                                                 {
-					                                                    name: "alfresco/renderers/Separator",
-					                                                    align: "left"
-					                                                 },
-					                                                 {
-					                                                    name: "alfresco/renderers/Favourite",
-					                                                    align: "left",
-					                                                    config: {
-					                                                       currentItem: jsonNode.item
-					                                                    }
-					                                                 },
-					                                                 {
-					                                                    name: "alfresco/renderers/Separator",
-					                                                    align: "left"
-					                                                 },
-					                                                 {
-					                                                    name: "alfresco/renderers/Like",
 					                                                    align: "left",
 					                                                    config: {
 					                                                       currentItem: jsonNode.item
