@@ -76,7 +76,7 @@ public class NodeAuditTrailWebScript extends DeclarativeWebScript {
 
 			nodeRefString = nodeRefString.replace(":/", "");
 			NodeRef nodeRef = repository.findNodeRef("node", nodeRefString.split("/"));
-
+			
 			if (!permissionHelper.checkPermissions(nodeRef)) {
 				model.put("data", new ArrayList<>());
 				status.setCode(HttpStatus.FORBIDDEN.value());
@@ -85,7 +85,6 @@ public class NodeAuditTrailWebScript extends DeclarativeWebScript {
 
 			List<TemplateAuditInfo> auditTrailList = getAuditTrail(nodeRef);
 			List<Map<String,Object>> auditList = new ArrayList<Map<String,Object>>(auditTrailList.size());
-
 			for(TemplateAuditInfo auditInfo : auditTrailList){
 				if(logger.isDebugEnabled()){
 					logger.debug(auditInfo.toString());
@@ -165,17 +164,17 @@ public class NodeAuditTrailWebScript extends DeclarativeWebScript {
 				AuditQueryParameters pathParams = new AuditQueryParameters();
 				pathParams.setApplicationName(applicationName);
 				pathParams.addSearchKey("/alfresco-access/transaction/path", nodePath);
-				auditService.auditQuery(callback, pathParams, -1);
+				auditService.auditQuery(callback, pathParams, Integer.MAX_VALUE);
 
 				AuditQueryParameters copyFromPathParams = new AuditQueryParameters();
 				copyFromPathParams.setApplicationName(applicationName);
 				copyFromPathParams.addSearchKey("/alfresco-access/transaction/copy/from/path", nodePath);
-				auditService.auditQuery(callback, copyFromPathParams, -1);
+				auditService.auditQuery(callback, copyFromPathParams, Integer.MAX_VALUE);
 
 				AuditQueryParameters moveFromPathParams = new AuditQueryParameters();
 				moveFromPathParams.setApplicationName(applicationName);
 				moveFromPathParams.addSearchKey("/alfresco-access/transaction/move/from/path", nodePath);
-				auditService.auditQuery(callback, moveFromPathParams, -1);
+				auditService.auditQuery(callback, moveFromPathParams, Integer.MAX_VALUE);
 
 				return null;
 			}
