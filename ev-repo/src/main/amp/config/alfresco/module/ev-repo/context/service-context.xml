@@ -3,18 +3,25 @@
 
 <beans>
 
-    <!-- A simple class that is initialized by Spring 
-    <bean id="com.eisenvault.exampleBean" class="com.eisenvault.demoamp.Demo" init-method="init" />-->
-
-    <!-- A simple module component that will be executed once 
-    <bean id="com.eisenvault.exampleComponent" class="com.eisenvault.demoamp.DemoComponent" parent="module.baseComponent" >
-        <property name="moduleId" value="${project.artifactId}" />  
-        <property name="name" value="exampleComponent" />
-        <property name="description" value="A demonstration component" />
-        <property name="sinceVersion" value="2.0" />
-        <property name="appliesFromVersion" value="2.0" />
-        <property name="nodeService" ref="NodeService" />
-        <property name="nodeLocatorService" ref="nodeLocatorService" />
-    </bean>-->
+    <bean id="permissionHelper" class="com.eisenvault.utils.PermissionHelper">
+    	<property name="authorityService">
+			<ref bean="AuthorityService" />
+		</property>	
+		<property name="permissionService">
+			<ref bean="PermissionService" />
+		</property>	
+		<property name="siteService">
+			<ref bean="SiteService" />
+		</property>	
+		<property name="allowedGroups">
+			<value>${auditreport.allowedGroups}</value>
+		</property>
+		<property name="writePermission">
+			<value>${auditreport.writePermission}</value>
+		</property>
+		<property name="allowedSiteGroup">
+			<value>${auditreport.allowedSiteGroup}</value>
+		</property>
+    </bean>
     
 </beans>
