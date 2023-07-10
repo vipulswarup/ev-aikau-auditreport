@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.eisenvault</groupId>
     <artifactId>ev-aikau-auditreport</artifactId>
-    <version>1.1.0</version>
+    <version>1.1.1</version>
     <packaging>pom</packaging>
 
     <name>Aikau Audit Report</name>
@@ -49,6 +49,15 @@
                 <twitter>twitter.com/sujaypillai</twitter>
             </properties>
         </developer>
+        <developer>
+            <id>PedroKravetz</id>
+            <name>Pedro Kravetz</name>
+            <email>p.v.kravetz@gmail.com</email>
+            <timezone>America/Sao_Paulo</timezone>
+            <properties>
+                <linkedin>https://www.linkedin.com/in/pedrokravetz/</linkedin>
+            </properties>
+        </developer> 
     </developers>
 
     <properties>
