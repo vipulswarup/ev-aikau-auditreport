@@ -10,7 +10,7 @@
 	<parent>
 		<groupId>com.eisenvault</groupId>
 		<artifactId>ev-aikau-auditreport</artifactId>
-		<version>1.1.0</version>
+		<version>1.1.1</version>
 	</parent>
 
 	<!-- SDK properties have sensible defaults in the SDK parent, but you can 
@@ -67,6 +67,13 @@
 				</exclusion>
 			</exclusions>
 		</dependency>
+
+        <!-- commons lang dependency -->
+        <dependency>
+            <groupId>commons-lang</groupId>
+            <artifactId>commons-lang</artifactId>
+            <version>2.6</version>
+        </dependency>
 	</dependencies>
 
 	<profiles>
