@@ -13,6 +13,100 @@ A custom Document Library Action and link on Document Details page are provided 
 
 EisenVault [www.eisenvault.com] takes away the hassle of managing documents by storing them in both electronic and physical forms, enabling smart-search and deploying quick retrieval measures. Our innovative cloud-based document management system can be used in multiple industry sectors, and caters to specific requirements of various job roles. Our vision - to be your preferred partner for electronic and physical document management.
 
+# API Endpoints
+
+This addon provides the following REST API endpoints for audit functionality:
+
+## 1. Node Audit Trail API
+
+**Endpoint:** `GET /ev/nodeaudittrail`
+
+**Description:** Retrieves the complete audit trail for a specific node/document.
+
+**Parameters:**
+- `nodeRef` (required): The node reference of the document in Alfresco format (e.g., `workspace://SpacesStore/12345678-1234-1234-1234-123456789012`)
+
+**Response Format:**
+```json
+{
+  "data": [
+    {
+      "userName": "admin",
+      "applicationName": "alfresco-access",
+      "applicationMethod": "UPDATE NODE PROPERTIES",
+      "date": "2023-12-01T10:30:00.000Z",
+      "auditValues": {
+        "/alfresco-access/transaction/action": "updateNodeProperties",
+        "/alfresco-access/transaction/path": "/app:company_home/cm:test-document.pdf",
+        "/alfresco-access/transaction/properties/cm:name": "test-document.pdf"
+      }
+    }
+  ],
+  "nodeRef": "12345678-1234-1234-1234-123456789012",
+  "fileName": "test-document.pdf",
+  "count": 1,
+  "returnStatus": true,
+  "statusMessage": "Successfully retrieved audit trail for nodeRef[12345678-1234-1234-1234-123456789012]"
+}
+```
+
+**Response Fields:**
+- `data`: Array of audit entries
+  - `userName`: Username who performed the action
+  - `applicationName`: Application that generated the audit entry (typically "alfresco-access")
+  - `applicationMethod`: Human-readable description of the action performed
+  - `date`: Timestamp of the audit entry
+  - `auditValues`: Key-value pairs containing detailed audit information
+- `nodeRef`: The node reference ID
+- `fileName`: Name of the document
+- `count`: Total number of audit entries
+- `returnStatus`: Boolean indicating success/failure
+- `statusMessage`: Descriptive message about the operation
+
+**Error Response:**
+```json
+{
+  "returnStatus": false,
+  "statusMessage": "Error message describing the issue"
+}
+```
+
+## 2. Permission Check API
+
+**Endpoint:** `GET /ev/hasPermissions`
+
+**Description:** Checks if the current user has permission to view audit data for a specific node.
+
+**Parameters:**
+- `nodeRef` (required): The node reference of the document in Alfresco format
+
+**Response Format:**
+```json
+{
+  "result": true
+}
+```
+
+**Response Fields:**
+- `result`: Boolean indicating whether the user has permission to view audit data
+
+**Error Response:**
+```json
+{
+  "result": false
+}
+```
+
+## 3. Document Details Audit Component
+
+**Endpoint:** `GET /eisenvault/components/document-details/evaudit`
+
+**Description:** Returns the HTML component for displaying audit information in the document details panel.
+
+**Parameters:** None (uses context from the current document)
+
+**Response:** HTML template for the audit component
+
 # Configuration
 
 This addon uses the default **alfresco-access** audit application. Make sure that you have below lines added to alfresco-global.properties:
@@ -54,3 +148,46 @@ This ...
 1. ... allows Alfresco or Site Administrators to get information of a document.
 2. ... allows SiteManager of a site to access audit information of a document. 
 3. ... other members of a Site can not access audit information of a document.
+
+# Usage Examples
+
+## Using the Node Audit Trail API
+
+```bash
+# Get audit trail for a specific document
+curl -X GET "http://localhost:8080/alfresco/service/ev/nodeaudittrail?nodeRef=workspace://SpacesStore/12345678-1234-1234-1234-123456789012" \
+  -H "Authorization: Basic <base64-encoded-credentials>"
+```
+
+## Using the Permission Check API
+
+```bash
+# Check if user has permission to view audit data
+curl -X GET "http://localhost:8080/alfresco/service/ev/hasPermissions?nodeRef=workspace://SpacesStore/12345678-1234-1234-1234-123456789012" \
+  -H "Authorization: Basic <base64-encoded-credentials>"
+```
+
+## Frontend Integration
+
+The addon provides:
+- Document Library action button for viewing audit data
+- Document Details panel integration
+- Custom AIKAU widgets for displaying audit information
+- Breadcrumb navigation and back button functionality
+
+# Audit Data Types
+
+The audit trail captures the following types of actions:
+- **UPDATE NODE PROPERTIES**: When document properties are modified
+- **READ CONTENT**: When document content is accessed
+- **COPY**: When documents are copied
+- **MOVE**: When documents are moved
+- **DELETE**: When documents are deleted
+- **CREATE**: When new documents are created
+
+Each audit entry includes:
+- User who performed the action
+- Timestamp of the action
+- Application that generated the audit entry
+- Detailed audit values with property changes
+- File path information
